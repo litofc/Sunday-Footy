@@ -152,6 +152,7 @@ h1{font-size:28px;font-weight:800;margin:0;letter-spacing:-.02em}
 .prow a{color:var(--blue);font-weight:700;text-decoration:none}
 .pcard .btn{margin-top:8px}
 .sharebox{border:1.5px solid var(--blue);background:#eef3ff;border-radius:14px;padding:12px;margin-bottom:16px}
+.sharebox .sharelink{font-size:14px;color:var(--blue);font-weight:600}
 .sharebox textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;resize:none;background:#fff}
 .sharebox .acts{margin-top:8px}
 
@@ -205,6 +206,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);outline:none}
 .fl input{font-weight:500}
 input.invalid{border-color:var(--danger);background:#fff5f5}
 .addp .err{min-height:0;margin-top:-4px}
+.flabel{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:-4px}
+.durs{display:flex;gap:6px;flex-wrap:wrap}
+.dur{flex:1;min-width:64px;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 6px;font-size:15px;font-weight:800;color:var(--ink)}
+.dur.on{background:var(--acid);border-color:var(--ink)}
+.endbox{display:flex;flex-direction:column;justify-content:flex-end;gap:4px;font-size:13px;font-weight:700;color:var(--muted)}
+.endbox b{display:block;border:1.5px dashed var(--line);border-radius:10px;padding:9px 12px;font-size:16px;color:var(--ink);background:var(--soft)}
+.tgrid{grid-template-columns:1fr 1fr!important}
+select{appearance:none;-webkit-appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2315151a' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center;padding-right:34px}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;opacity:0;transition:.2s;pointer-events:none;z-index:99;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){#toast{transition:none}}
@@ -274,13 +283,13 @@ const I18N = {
     dup: n => `${n} is already on the list. Press the button again to add another ${n}.`,
     fullNote: "The squad is full. New names go on the bench and get a call if someone drops out.",
     addPlayer: "Add player", addBench: "Add to bench", addedSquad: n => `${n} added to the squad`, addedBench: n => `${n} added to the bench`,
-    copyMsg: "Copy message", sendWA: "Send on WhatsApp", more: "More…", copied: "Message copied", copyManual: "Select the text and copy it",
+    copyMsg: "Copy link", sendWA: "Send on WhatsApp", more: "More…", copied: "Link copied", copyManual: "Select the text and copy it",
     eventGone: "This event was deleted", notFound: "Event not found", backCal: "Exit preview", guestBanner: "Preview: this is exactly what friends see from the link.", loading: "Loading…",
     unavailT: "This event isn't available", unavailP: "It may have been deleted. Ask the organiser for a new link.",
     sTotal: (t, pp, n) => `${t} total, ${pp} each with ${n} players`, sTotalOnly: t => `${t} total`,
     sFull: (n, mx) => `Squad full (${n}/${mx}). Add yourself to the bench in case a spot opens`,
     sSpots: (n, mx) => `${n}/${mx} in, free spots: ${mx - n}`, sJoin: "Add your name:",
-    connectFail: "Couldn't connect to Firebase. Check the config.", syncErr: "Sync error"
+    connectFail: "Couldn't connect to Firebase. Check the config.", savedField: "Saved field", newField: "+ New field", duration: "Duration", endsAt: t => `Ends at ${t}`, durs: ["1 h","1½ h","2 h","3 h"], minutes: m => `${m} min`, syncErr: "Sync error"
   },
   el: {
     _name: "ΕΛ",
@@ -316,13 +325,13 @@ const I18N = {
     dup: n => `${n}: υπάρχει ήδη στη λίστα. Πάτα ξανά το κουμπί για να προστεθεί κι άλλος ${n}.`,
     fullNote: "Η ομάδα γέμισε. Τα νέα ονόματα πάνε στον πάγκο και θα τους καλέσουμε αν κάποιος ακυρώσει.",
     addPlayer: "Προσθήκη παίκτη", addBench: "Προσθήκη στον πάγκο", addedSquad: n => `${n}: μπήκε στην ομάδα`, addedBench: n => `${n}: μπήκε στον πάγκο`,
-    copyMsg: "Αντιγραφή μηνύματος", sendWA: "Αποστολή στο WhatsApp", more: "Περισσότερα…", copied: "Το μήνυμα αντιγράφηκε", copyManual: "Επίλεξε το κείμενο και αντέγραψέ το",
+    copyMsg: "Αντιγραφή συνδέσμου", sendWA: "Αποστολή στο WhatsApp", more: "Περισσότερα…", copied: "Ο σύνδεσμος αντιγράφηκε", copyManual: "Επίλεξε το κείμενο και αντέγραψέ το",
     eventGone: "Η εκδήλωση διαγράφηκε", notFound: "Η εκδήλωση δεν βρέθηκε", backCal: "Έξοδος", guestBanner: "Προεπισκόπηση: έτσι το βλέπουν οι φίλοι από τον σύνδεσμο.", loading: "Φόρτωση…",
     unavailT: "Η εκδήλωση δεν είναι διαθέσιμη", unavailP: "Ίσως διαγράφηκε. Ζήτα νέο σύνδεσμο από τον διοργανωτή.",
     sTotal: (t, pp, n) => `${t} συνολικά, ${pp} το άτομο (${n} παίκτες)`, sTotalOnly: t => `${t} συνολικά`,
     sFull: (n, mx) => `Η ομάδα γέμισε (${n}/${mx}). Γράψου στον πάγκο, μήπως ανοίξει θέση`,
     sSpots: (n, mx) => `${n}/${mx} μέσα, ελεύθερες θέσεις: ${mx - n}`, sJoin: "Γράψε το όνομά σου:",
-    connectFail: "Δεν έγινε σύνδεση με το Firebase. Έλεγξε τις ρυθμίσεις.", syncErr: "Σφάλμα συγχρονισμού"
+    connectFail: "Δεν έγινε σύνδεση με το Firebase. Έλεγξε τις ρυθμίσεις.", savedField: "Αποθηκευμένο γήπεδο", newField: "+ Νέο γήπεδο", duration: "Διάρκεια", endsAt: t => `Λήξη στις ${t}`, durs: ["1 ώρα","1½ ώρα","2 ώρες","3 ώρες"], minutes: m => `${m} λεπτά`, syncErr: "Σφάλμα συγχρονισμού"
   },
   uk: {
     _name: "УК",
@@ -358,13 +367,13 @@ const I18N = {
     dup: n => `${n} вже є у списку. Натисни кнопку ще раз, щоб додати ще одного ${n}.`,
     fullNote: "Склад заповнено. Нові імена йдуть на лавку, і їх покличуть, якщо хтось відмовиться.",
     addPlayer: "Додати гравця", addBench: "Додати на лавку", addedSquad: n => `${n} у складі`, addedBench: n => `${n} на лавці`,
-    copyMsg: "Копіювати", sendWA: "Надіслати у WhatsApp", more: "Ще…", copied: "Скопійовано", copyManual: "Виділи текст і скопіюй",
+    copyMsg: "Копіювати посилання", sendWA: "Надіслати у WhatsApp", more: "Ще…", copied: "Посилання скопійовано", copyManual: "Виділи текст і скопіюй",
     eventGone: "Подію видалено", notFound: "Подію не знайдено", backCal: "Вийти", guestBanner: "Попередній перегляд: так це бачать друзі за посиланням.", loading: "Завантаження…",
     unavailT: "Подія недоступна", unavailP: "Можливо, її видалено. Попроси в організатора нове посилання.",
     sTotal: (t, pp, n) => `${t} разом, ${pp} з людини (гравців: ${n})`, sTotalOnly: t => `${t} разом`,
     sFull: (n, mx) => `Склад заповнено (${n}/${mx}). Запишися на лавку, раптом звільниться місце`,
     sSpots: (n, mx) => `${n}/${mx} записано, вільних місць: ${mx - n}`, sJoin: "Запишись тут:",
-    connectFail: "Не вдалося підключитися до Firebase. Перевір налаштування.", syncErr: "Помилка синхронізації"
+    connectFail: "Не вдалося підключитися до Firebase. Перевір налаштування.", savedField: "Збережене поле", newField: "+ Нове поле", duration: "Тривалість", endsAt: t => `Кінець о ${t}`, durs: ["1 год","1½ год","2 год","3 год"], minutes: m => `${m} хв`, syncErr: "Помилка синхронізації"
   }
 };
 function pickLang(){
@@ -404,6 +413,30 @@ const isFull = e => { const m = maxOf(e); return !!(m && squad(e).length >= m); 
 function placePlayer(e, p){ return { ...p, bench: isFull(e) }; }
 function movedList(e, pid, toBench){ const pl = e.players || [], p = pl.find(x => x.id === pid); if (!p) return pl; return [...pl.filter(x => x.id !== pid), { ...p, bench: toBench }]; }
 function perPerson(e){ const n = squad(e).length; const t = parseFloat(e.total); if (!t || !n) return null; return t / n; }
+const toMin = t => { const [h, m] = String(t || "").split(":").map(Number); return isNaN(h) ? null : h * 60 + (m || 0); };
+const fromMin = n => { n = ((n % 1440) + 1440) % 1440; return `${pad(Math.floor(n / 60))}:${pad(n % 60)}`; };
+const DURS = [60, 90, 120, 180];
+function durationOf(e){ const a = toMin(e.start), b = toMin(e.end); if (a == null || b == null) return 60; const d = ((b - a) + 1440) % 1440; return d || 60; }
+function timeOptions(cur){
+  const list = []; for (let m = 6 * 60; m < 24 * 60; m += 15) list.push(fromMin(m));
+  if (cur && !list.includes(cur)) { list.push(cur); list.sort(); }
+  return list.map(t => `<option value="${t}"${t === cur ? " selected" : ""}>${t}</option>`).join("");
+}
+let fieldsDoc = null;
+function savedFields(){
+  const map = new Map();
+  [...events].sort((a, b) => (a.date || "").localeCompare(b.date || "")).forEach(e => {
+    if (e.field) map.set(e.field.trim().toLowerCase(), { name: e.field.trim(), address: e.address || "", mapsUrl: e.mapsUrl || "" }); });
+  ((fieldsDoc && fieldsDoc.list) || []).forEach(f => { if (f && f.name) map.set(f.name.trim().toLowerCase(), f); });
+  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+async function rememberField(f){
+  if (!f.field) return;
+  const list = [...((fieldsDoc && fieldsDoc.list) || [])].filter(x => x.name.trim().toLowerCase() !== f.field.toLowerCase());
+  list.push({ name: f.field, address: f.address, mapsUrl: f.mapsUrl, updatedAt: Date.now() });
+  fieldsDoc = { id: "__fields", list };
+  try { await store.save("__fields", { list }); } catch (e) { console.warn(e); }
+}
 function timeRange(e){ return e.start && e.end ? `${e.start}–${e.end}` : (e.start || ""); }
 function mapsLink(e){ if (e.mapsUrl) return /^https?:\/\//i.test(e.mapsUrl) ? e.mapsUrl : "https://" + e.mapsUrl;
   const q = [e.field, e.address].filter(Boolean).join(", "); return q ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q) : ""; }
@@ -679,7 +712,7 @@ function openEvent(id){
 /* ---------- Event form ---------- */
 function defaultsFor(date){
   const last = [...events].sort((a, b) => (b.date + (b.start || "")).localeCompare(a.date + (a.start || "")))[0] || {};
-  return { type: last.type || "game", title: last.title || T("defTitle"), date, start: last.start || "20:00", end: last.end || "22:00",
+  return { type: last.type || "game", title: last.title || T("defTitle"), date, start: last.start || "20:00", end: fromMin(toMin(last.start || "20:00") + 60),
     maxPlayers: last.maxPlayers ?? "", field: last.field || "", address: last.address || "", mapsUrl: last.mapsUrl || "", total: last.total ?? "",
     bookerName: last.bookerName || "", bookerPhone: last.bookerPhone || "", notes: "" };
 }
@@ -687,6 +720,8 @@ function defaultsFor(date){
 function openForm(ev, date){
   const isNew = !ev;
   const v = ev || defaultsFor(date);
+  const saved = savedFields();
+  let dur = isNew ? 60 : durationOf(v);
   modalKind = "form"; sheet.onclick = null;
   sheet.innerHTML = `
   <div class="fhead"><h3>${esc(isNew ? T("newEvent") : T("editEvent"))}</h3><button class="x" id="fx" aria-label="${esc(T("close"))}">✕</button></div>
@@ -695,11 +730,15 @@ function openForm(ev, date){
       <label>${esc(T("type"))}<select name="type">${TYPE_KEYS.map(k => `<option value="${k}"${v.type === k ? " selected" : ""}>${esc(typeName(k))}</option>`).join("")}</select></label>
       <label>${esc(T("title"))}<input name="title" value="${esc(v.title)}" placeholder="${esc(T("defTitle"))}"></label>
     </div>
-    <div class="grid3">
-      <label>${esc(T("date"))}<input type="date" name="date" value="${esc(v.date)}"></label>
-      <label>${esc(T("start"))}<input type="time" name="start" value="${esc(v.start)}"></label>
-      <label>${esc(T("end"))}<input type="time" name="end" value="${esc(v.end)}"></label>
+    <label>${esc(T("date"))}<input type="date" name="date" value="${esc(v.date)}"></label>
+    <div class="grid2 tgrid">
+      <label>${esc(T("start"))}<select name="start">${timeOptions(v.start || "20:00")}</select></label>
+      <div class="endbox" id="endbox"></div>
     </div>
+    <div class="flabel">${esc(T("duration"))}</div>
+    <div class="durs" id="durs"></div>
+    ${saved.length ? `<label>${esc(T("savedField"))}<select id="fieldPick"><option value="">${esc(T("newField"))}</option>${saved.map((f, i) =>
+      `<option value="${i}"${v.field && f.name.toLowerCase() === v.field.toLowerCase() ? " selected" : ""}>${esc(f.name)}</option>`).join("")}</select></label>` : ""}
     <label>${esc(T("field"))}<input name="field" value="${esc(v.field)}" placeholder="Kallithea 5x5"></label>
     <label>${esc(T("address"))}<input name="address" value="${esc(v.address)}" placeholder="${esc(T("addressPh"))}"></label>
     <label>${esc(T("maps"))} <small>${esc(T("mapsHint"))}</small><input name="mapsUrl" value="${esc(v.mapsUrl)}" placeholder="https://maps.app.goo.gl/..." inputmode="url"></label>
@@ -719,6 +758,22 @@ function openForm(ev, date){
       <button class="btn primary" id="fsave">${esc(isNew ? T("create") : T("save"))}</button>
     </div>
   </div>`;
+  const box0 = $("#evForm"), q = n => box0.querySelector(`[name="${n}"]`);
+  const drawTime = () => {
+    const opts = DURS.includes(dur) ? DURS : [...DURS, dur].sort((a, b) => a - b);
+    $("#durs").innerHTML = opts.map(d => { const i = DURS.indexOf(d);
+      return `<button type="button" class="dur${d === dur ? " on" : ""}" data-d="${d}">${esc(i >= 0 ? L().durs[i] : T("minutes", d))}</button>`; }).join("");
+    $("#endbox").innerHTML = `<span>${esc(T("end"))}</span><b>${fromMin(toMin(q("start").value) + dur)}</b>`;
+  };
+  $("#durs").onclick = e => { const b = e.target.closest(".dur"); if (b) { dur = Number(b.dataset.d); drawTime(); } };
+  q("start").onchange = drawTime;
+  drawTime();
+  const pick = $("#fieldPick");
+  if (pick) pick.onchange = () => {
+    const f = saved[pick.value];
+    q("field").value = f ? f.name : ""; q("address").value = f ? f.address || "" : ""; q("mapsUrl").value = f ? f.mapsUrl || "" : "";
+    if (!f) q("field").focus();
+  };
   const back = () => isNew ? closeModal() : openEvent(ev.id);
   $("#fx").onclick = closeModal;
   $("#fcancel").onclick = back;
@@ -733,7 +788,8 @@ function openForm(ev, date){
   }
   $("#fsave").onclick = async () => {
     const box = $("#evForm"), val = k => String(box.querySelector(`[name="${k}"]`).value || "").trim(), f = {};
-    ["type","title","date","start","end","field","address","mapsUrl","bookerName","bookerPhone","notes"].forEach(k => f[k] = val(k));
+    ["type","title","date","start","field","address","mapsUrl","bookerName","bookerPhone","notes"].forEach(k => f[k] = val(k));
+    f.end = fromMin(toMin(f.start) + dur);
     if (!f.date) { toast(T("pickDate")); return; }
     const t = val("total"); f.total = t === "" ? null : Number(t);
     const mx = parseInt(val("maxPlayers"), 10); f.maxPlayers = mx > 0 ? mx : null;
@@ -743,6 +799,7 @@ function openForm(ev, date){
     const btn = $("#fsave"); btn.disabled = true;
     try {
       await store.save(id, f);
+      rememberField(f);
       const i = events.findIndex(x => x.id === id);
       if (i >= 0) events[i] = { ...events[i], ...f }; else events.push({ id, ...f });
       const [yy, mm] = f.date.split("-").map(Number); view = { y: yy, m: mm - 1 };
@@ -811,7 +868,7 @@ function mountEventView(root, ev, opts){
       catch (err) { toast(T("cantMove") + ": " + err.message); a.disabled = false; }
     }
     else if (act === "copy") copyShare(root);
-    else if (act === "native") { try { await navigator.share({ title: ev.title || typeName(ev.type), text: shareText(ev), url: eventUrl(ev.id) }); } catch {} }
+    else if (act === "native") { try { await navigator.share({ title: ev.title || typeName(ev.type), url: eventUrl(ev.id) }); } catch {} }
   };
 
   const form = root.querySelector(".addp");
@@ -901,7 +958,7 @@ function updateEventView(root, ev){
       </div>
     </div>` : "";
   const sb = root.querySelector(".sharebox");
-  if (!sb.classList.contains("hidden")) sb.querySelector("textarea").value = shareText(ev);
+
 }
 
 function shareText(ev){
@@ -918,8 +975,8 @@ function shareText(ev){
 function toggleShare(root, ev){
   const sb = root.querySelector(".sharebox");
   if (!sb.classList.contains("hidden")) { sb.classList.add("hidden"); return; }
-  const text = shareText(ev);
-  sb.innerHTML = `<textarea rows="6" readonly>${esc(text)}</textarea>
+  const text = eventUrl(ev.id);
+  sb.innerHTML = `<input class="sharelink" readonly value="${esc(text)}" onclick="this.select()">
     <div class="acts">
       <button class="btn sm primary" data-act="copy">${esc(T("copyMsg"))}</button>
       <a class="btn sm" href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank" rel="noopener" style="text-decoration:none">${esc(T("sendWA"))}</a>
@@ -928,7 +985,7 @@ function toggleShare(root, ev){
   sb.classList.remove("hidden");
 }
 async function copyShare(root){
-  const ta = root.querySelector(".sharebox textarea");
+  const ta = root.querySelector(".sharebox .sharelink");
   try { await navigator.clipboard.writeText(ta.value); toast(T("copied")); }
   catch { ta.select(); try { document.execCommand("copy"); toast(T("copied")); } catch { toast(T("copyManual")); } }
 }
@@ -959,7 +1016,7 @@ function updatePublic(){
   route();
   store = await initStore();
   setSync();
-  store.subscribe(list => { events = list; loaded = true; onData(); });
+  store.subscribe(list => { fieldsDoc = list.find(e => e.id === "__fields") || fieldsDoc; events = list.filter(e => !String(e.id).startsWith("__") && e.date); loaded = true; onData(); });
 })();
 </script>
 </body>
