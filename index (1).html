@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sunday Football</title>
+<meta name="theme-color" content="#fbfbfa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Football">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbfbfa; --card:#fff; --ink:#15151a; --muted:#6d6d78; --line:#ebebee; --soft:#f4f4f6;
+  --acid:#c6ff3d; --orange:#ff7a1a; --blue:#2f6bff; --yellow:#ffd60a;
+  --game-b:#9fdc00; --game-bg:#c6ff3d; --game-t:#1a2600;
+  --training-b:#1d55e0; --training-bg:#2f6bff; --training-t:#fff;
+  --friendly-b:#e86200; --friendly-bg:#ff7a1a; --friendly-t:#fff;
+  --social-b:#e6bd00; --social-bg:#ffd60a; --social-t:#2b2300;
+  --danger:#e5383b; --sky:#2f6bff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:Manrope,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button,a,[role=button]{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+input,select,textarea{min-width:0}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+
+.wrap{max-width:860px;margin:0 auto;padding:28px 16px 64px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px}
+h1{font-size:28px;font-weight:800;margin:0;letter-spacing:-.02em}
+.sub{font-size:13px;color:var(--muted);font-weight:700;margin-top:2px}
+.topacts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.sync{font-size:12px;padding:6px 10px;border-radius:99px;background:#fff;border:1px solid var(--line);color:var(--muted);white-space:nowrap;font-weight:600}
+.sync i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#7bd600;margin-right:6px;vertical-align:1px}
+.sync.warn i{background:var(--orange)}.sync.bad i{background:var(--danger)}
+
+.nav{display:flex;align-items:center;justify-content:space-between;margin:6px 0 14px;gap:10px}
+.navbtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:18px;font-weight:700}
+.navmid{text-align:center}
+.navtitle{font-weight:800;font-size:18px}
+.linkbtn{background:none;border:0;color:var(--muted);font-size:12px;font-weight:700;text-decoration:underline;padding:2px}
+
+.cal{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.cal-h{display:grid;grid-template-columns:repeat(7,1fr);background:var(--soft);color:var(--muted);border-bottom:1px solid var(--line);font-size:12px;font-weight:700;text-align:center}
+.cal-h div{padding:10px 0}
+.cal-g{display:grid;grid-template-columns:repeat(7,1fr)}
+.day{min-height:96px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:4px;background:#fff;min-width:0;cursor:pointer;text-align:left}
+.day:nth-child(7n){border-right:0}
+.day.blank{background:var(--soft);cursor:default}
+.day.sun{background:#f8ffe9}
+.day:not(.blank):hover{background:#f1f1f4}
+.dn{font-size:12px;font-weight:700;color:var(--muted);width:22px;height:22px;display:grid;place-items:center}
+.day.has .dn{color:var(--ink)}
+.day.today .dn{background:var(--acid);color:var(--ink);border-radius:50%;box-shadow:0 0 0 2px var(--ink)}
+.chip{display:block;text-align:left;width:100%;border:1.5px solid;border-radius:8px;padding:3px 6px;font-size:11px;font-weight:800;overflow:hidden;line-height:1.3}
+.chip .ct{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip small{display:block;font-weight:600;font-size:10px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-game{border-color:var(--game-b);background:var(--game-bg);color:var(--game-t)}
+.t-training{border-color:var(--training-b);background:var(--training-bg);color:var(--training-t)}
+.t-friendly{border-color:var(--friendly-b);background:var(--friendly-bg);color:var(--friendly-t)}
+.t-social{border-color:var(--social-b);background:var(--social-bg);color:var(--social-t)}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:12px 2px 22px;font-size:12px;color:var(--muted);font-weight:600}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;border:1.5px solid}
+
+.next{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;cursor:pointer;width:100%;text-align:left;display:block}
+.next.t-game{border-color:var(--game-b)}.next.t-training{border-color:var(--training-b)}.next.t-friendly{border-color:var(--friendly-b)}.next.t-social{border-color:var(--social-b)}
+.next-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.next-title{font-weight:800;font-size:16px}
+.next-when{font-size:13px;color:var(--muted);font-weight:600}
+.next-label{font-size:12px;font-weight:700;color:var(--muted);margin:0 0 6px 2px}
+
+/* Overlay / sheet */
+.ov{position:fixed;inset:0;background:rgba(20,20,26,.4);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.sheet{background:#fff;border-radius:20px;width:100%;max-width:520px;max-height:calc(100% - 32px);overflow:auto;padding:24px;box-shadow:0 20px 60px rgba(20,20,26,.2)}
+@media (max-width:600px){
+  .ov{align-items:flex-end;padding:0}
+  .sheet{border-radius:20px 20px 0 0;max-height:92%;padding:20px 18px calc(24px + env(safe-area-inset-bottom,0px))}
+  .day{min-height:68px;padding:4px}
+  .chip{font-size:10px;padding:2px 4px}
+  .chip{padding:3px 2px;text-align:center;border-radius:6px}
+  .chip .ct,.chip small{display:none}
+  .day .chip .cn{display:block;font-size:11px;font-weight:800}
+  h1{font-size:24px}
+  .topbar{align-items:center}
+}
+
+/* Event view */
+.ev-head{display:flex;justify-content:space-between;align-items:flex-start}
+.ev-date{display:flex;align-items:center;gap:10px}
+.dnum{font-size:52px;font-weight:800;line-height:1;letter-spacing:-.03em}
+.dmon{font-size:16px;font-weight:800;color:var(--muted)}
+.dsub{font-size:13px;font-weight:600;color:#a0a0aa}
+.x{border:0;background:none;font-size:20px;color:var(--muted);width:36px;height:36px;border-radius:10px}
+.x:hover{background:var(--soft)}
+.ev-row{display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px;gap:8px;flex-wrap:wrap}
+.badge{display:inline-block;border:1.5px solid;border-radius:99px;padding:3px 12px;font-size:12px;font-weight:800}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px}
+.btn.sm{padding:6px 11px;font-size:13px}
+.btn:hover{background:var(--soft)}
+.btn.share{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.share:hover{background:#1d55e0}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.primary:hover{background:#2c2c34}
+.btn.danger{color:var(--danger);border-color:#f6c6c7}
+.btn.danger[data-armed]{background:var(--danger);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.ev-title{font-size:22px;font-weight:800;margin:6px 0 0;letter-spacing:-.01em}
+.ev-time{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:14px}
+.info{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:14px;margin-bottom:14px}
+.irow{display:flex;gap:10px;font-size:14px;line-height:1.45}
+.irow .ic{width:20px;flex:none;text-align:center}
+.irow a{color:var(--blue);font-weight:700;text-decoration:none}
+.irow a:hover{text-decoration:underline}
+.phl{display:inline-flex;gap:10px;margin-left:6px}
+.money{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;margin-bottom:18px}
+.money div{background:var(--soft);border-radius:12px;padding:10px 12px}
+.money span{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.money b{font-size:20px;font-weight:800}
+.money .pp{background:var(--acid);color:var(--ink)}
+.money .pp span{color:#3f5a00}
+.sec{font-size:13px;font-weight:800;color:var(--muted);margin:4px 0 10px}
+.players{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.pchip{border:1.5px solid #b6e85a;background:#f2ffd9;color:#2c3d00;border-radius:99px;padding:5px 12px 5px 6px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.pchip .pn{background:#fff;border-radius:99px;min-width:20px;height:20px;display:grid;place-items:center;font-size:11px;padding:0 5px}
+.pchip .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6}
+.pchip.on{background:var(--acid);border-color:var(--ink);color:var(--ink)}
+.pchip.bench{border:1.5px dashed #e6bd00;background:#fff8d1;color:#4a3b00}
+.pchip.bench.on{background:var(--yellow);border-style:solid;border-color:var(--ink)}
+.sec .tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:800;vertical-align:1px}
+.tag.full{background:var(--orange);color:#fff}
+.tag.open{background:var(--acid);color:var(--ink)}
+.benchnote{font-size:13px;color:var(--muted);margin:-4px 0 10px}
+.fullnote{font-size:13px;font-weight:700;color:#7a5c00;background:#fff8d1;border-radius:10px;padding:8px 10px}
+.pcard .acts{margin-top:8px}
+.pcard .acts .btn{margin-top:0}
+.empty{font-size:14px;color:var(--muted);padding:6px 2px 10px}
+.pcard{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:14px;background:var(--soft);font-size:14px}
+.pc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pc-head b{font-size:16px}
+.prow{margin:4px 0;line-height:1.45}
+.prow a{color:var(--blue);font-weight:700;text-decoration:none}
+.pcard .btn{margin-top:8px}
+.sharebox{border:1.5px solid var(--blue);background:#eef3ff;border-radius:14px;padding:12px;margin-bottom:16px}
+.sharebox textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;resize:none;background:#fff}
+.sharebox .acts{margin-top:8px}
+
+/* Forms */
+.addp{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px}
+input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;background:#fff}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);outline:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px}
+.grid3>*,.grid2>*{min-width:0}
+@media (max-width:600px){.grid3{grid-template-columns:1fr 1fr}.grid3>label:first-child{grid-column:1/-1}}
+.chip .cn{display:none}
+@media (max-width:420px){.grid2{grid-template-columns:1fr}}
+.form{display:flex;flex-direction:column;gap:10px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--muted)}
+.form label small{font-weight:600;color:#a0a0aa}
+.fhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.fhead h3{margin:0;font-size:20px;font-weight:800}
+.btnrow{display:flex;gap:8px;align-items:center;margin-top:6px}
+.grow{flex:1}
+.warn{font-size:13px;color:#b45300;font-weight:700}
+.daylist{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.daylist .chip{font-size:14px;padding:10px 12px;border-radius:12px}
+.daylist .chip small{font-size:12px;display:block}
+
+/* Lock + public */
+.center{min-height:100vh;display:grid;place-items:center;padding:20px}
+.card{background:#fff;border-radius:20px;padding:24px;width:100%;box-shadow:0 10px 40px rgba(20,20,26,.06);border:1px solid var(--line)}
+.lock{max-width:360px;text-align:center;border-top:6px solid var(--acid)}
+.lock h1{margin-bottom:4px}
+.lock .lockf{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.err{color:var(--danger);font-size:13px;font-weight:700;min-height:18px}
+.pub{max-width:560px;margin:0 auto;padding:24px 14px 60px}
+.pub-brand{font-weight:800;font-size:18px;margin:0 4px 12px;display:flex;justify-content:space-between;align-items:center}
+.pub-foot{text-align:center;margin-top:16px;font-size:13px}
+.pub-foot a{color:var(--muted);font-weight:700}
+
+
+.langsw{display:inline-flex;border:1px solid var(--line);border-radius:99px;background:#fff;padding:2px;gap:2px}
+.langsw button{border:0;background:none;border-radius:99px;padding:4px 9px;font-size:12px;font-weight:800;color:var(--muted)}
+.langsw button.on{background:var(--ink);color:var(--acid)}
+.lockl{display:flex;justify-content:center;margin-bottom:14px}
+.pub-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.money b .of{font-style:normal;font-size:14px;color:var(--muted)}
+@media (max-width:600px){.topbar{flex-wrap:wrap}.topacts{width:100%;justify-content:space-between}}
+.gbanner{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--ink);color:#fff;padding:10px 14px;font-size:13px;font-weight:700}
+.gbanner .btn{background:var(--acid);border-color:var(--acid);color:var(--ink);flex:none}
+.fl{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--ink)}
+.fl .req{display:inline;font-size:11px;font-weight:800;color:#fff;background:var(--orange);border-radius:99px;padding:1px 7px;margin-left:4px}
+.fl .opt{display:inline;font-size:11px;font-weight:600;color:#a0a0aa;margin-left:4px}
+.fl input{font-weight:500}
+input.invalid{border-color:var(--danger);background:#fff5f5}
+.addp .err{min-height:0;margin-top:-4px}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;opacity:0;transition:.2s;pointer-events:none;z-index:99;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="ov" class="ov hidden"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="toast" role="status"></div>
+
+<script>
+/* ============================================================
+   SETTINGS — edit these before deploying
+   ============================================================ */
+const CONFIG = {
+  TEAM_NAME: "Sunday Football",
+  ADMIN_PASSWORD: "football",       // password for the calendar page (not case-sensitive)
+  CURRENCY: "€",
+  DEFAULT_COUNTRY_CODE: "30",       // used for WhatsApp links when a number has no +code
+  DEFAULT_LANGUAGE: "",             // "en", "el" or "uk". Empty = follow the phone's language
+  // Paste your Firebase web config here to enable cloud sync on GitHub Pages:
+  FIREBASE: {
+    apiKey: "AIzaSyDN9ON6ZpdIu09jfN_8UjA1-EOCuToe2Uc",
+    authDomain: "sunday-footy-82023.firebaseapp.com",
+    projectId: "sunday-footy-82023",
+    storageBucket: "sunday-footy-82023.firebasestorage.app",
+    messagingSenderId: "834336411420",
+    appId: "1:834336411420:web:7b6f0979b2dacb3217f4d9"
+  }
+};
+
+/* ============================================================
+   Translations
+   ============================================================ */
+const I18N = {
+  en: {
+    _name: "EN",
+    months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+    monthsGen: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+    wd: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    wdShort: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+    types: { game:"Game", training:"Training", friendly:"Friendly", social:"Social" },
+    dayFmt: (wd, d, m) => `${wd} ${d} ${m}`,
+    lockSub: "Enter the team password to see the calendar", pwPh: "Password", wrongPw: "Wrong password. Try again.", unlock: "Unlock",
+    lock: "Lock", today: "Today", prevM: "Previous month", nextM: "Next month", close: "Close",
+    nextUp: "Next up", noPlayersYet: "No players yet", onBench: "on the bench", each: "each",
+    syncLive: "Live sync", syncPreview: "Preview sync", syncLocal: "Not saved · local only", syncBad: "Sync problem",
+    tipLive: "Changes appear for everyone instantly.", tipPreview: "Shared preview storage. Connect Firebase before deploying.", tipLocal: "Changes disappear on reload. Add your Firebase config.",
+    newOnDay: "+ New event on this day", playersN: n => `Players: ${n}`, benchN: n => `Bench: ${n}`,
+    newEvent: "New event", editEvent: "Edit event", type: "Type", title: "Title", defTitle: "Sunday game",
+    date: "Date", start: "Start", end: "End", field: "Field name", address: "Address", addressPh: "Street, number, area",
+    maps: "Maps link", mapsHint: "Optional. Leave empty to build it from the address.",
+    total: "Total price", totalHint: "Split between the squad.", max: "Max players", maxHint: "Extra names go on the bench.", maxPh: "No limit",
+    bookedBy: "Booked by", bookerPhone: "Booker's phone", namePh: "Name", notes: "Notes", optional: "Optional", notesPh: "Bring a dark and a white shirt",
+    del: "Delete", tapDel: "Tap again to delete", cancel: "Cancel", create: "Create event", save: "Save changes",
+    pickDate: "Pick a date first", created: "Event created", saved: "Changes saved", deleted: "Event deleted",
+    cantSave: "Couldn't save", cantDelete: "Couldn't delete", cantAdd: "Couldn't add", cantRemove: "Couldn't remove", cantMove: "Couldn't move",
+    guestView: "Guest view", edit: "Edit", share: "Share", openMaps: "Open in Maps", fieldDefault: "Field",
+    totalBox: "Total", playersBox: "Players", ppBox: "Per person",
+    squad: "Squad", fullTag: "Full", freeTag: n => `Free: ${n}`, bench: "Bench",
+    benchNote: "Waiting for a spot. They move to the squad only when the organiser moves them.",
+    noOne: "No one yet. Add the first player below.", noPhone: "No phone number",
+    toSquad: "Move to squad", toBench: "Move to bench", remove: "Remove from list", tapRemove: "Tap again to remove",
+    removed: "Removed from the list", removedSpot: "Removed. A spot opened, so call someone from the bench.",
+    squadFullMove: "The squad is full. Remove someone or raise the max first.", movedBench: "Moved to the bench", movedSquad: "Moved to the squad",
+    phonePh: "69...", pNotesPh: "e.g. Nikos' friend", phoneL: "Phone", reqTag: "required", optTag: "optional", nameMissing: "Write a name first",
+    dup: n => `${n} is already on the list. Press the button again to add another ${n}.`,
+    fullNote: "The squad is full. New names go on the bench and get a call if someone drops out.",
+    addPlayer: "Add player", addBench: "Add to bench", addedSquad: n => `${n} added to the squad`, addedBench: n => `${n} added to the bench`,
+    copyMsg: "Copy message", sendWA: "Send on WhatsApp", more: "More…", copied: "Message copied", copyManual: "Select the text and copy it",
+    eventGone: "This event was deleted", notFound: "Event not found", backCal: "Exit preview", guestBanner: "Preview: this is exactly what friends see from the link.", loading: "Loading…",
+    unavailT: "This event isn't available", unavailP: "It may have been deleted. Ask the organiser for a new link.",
+    sTotal: (t, pp, n) => `${t} total, ${pp} each with ${n} players`, sTotalOnly: t => `${t} total`,
+    sFull: (n, mx) => `Squad full (${n}/${mx}). Add yourself to the bench in case a spot opens`,
+    sSpots: (n, mx) => `${n}/${mx} in, free spots: ${mx - n}`, sJoin: "Add your name:",
+    connectFail: "Couldn't connect to Firebase. Check the config.", syncErr: "Sync error"
+  },
+  el: {
+    _name: "ΕΛ",
+    months: ["Ιανουάριος","Φεβρουάριος","Μάρτιος","Απρίλιος","Μάιος","Ιούνιος","Ιούλιος","Αύγουστος","Σεπτέμβριος","Οκτώβριος","Νοέμβριος","Δεκέμβριος"],
+    monthsGen: ["Ιανουαρίου","Φεβρουαρίου","Μαρτίου","Απριλίου","Μαΐου","Ιουνίου","Ιουλίου","Αυγούστου","Σεπτεμβρίου","Οκτωβρίου","Νοεμβρίου","Δεκεμβρίου"],
+    wd: ["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"],
+    wdShort: ["Δευ","Τρι","Τετ","Πεμ","Παρ","Σαβ","Κυρ"],
+    types: { game:"Αγώνας", training:"Προπόνηση", friendly:"Φιλικό", social:"Εκδήλωση" },
+    dayFmt: (wd, d, m) => `${wd} ${d} ${m}`,
+    lockSub: "Βάλε τον κωδικό της ομάδας για να δεις το ημερολόγιο", pwPh: "Κωδικός", wrongPw: "Λάθος κωδικός. Δοκίμασε ξανά.", unlock: "Είσοδος",
+    lock: "Έξοδος", today: "Σήμερα", prevM: "Προηγούμενος μήνας", nextM: "Επόμενος μήνας", close: "Κλείσιμο",
+    nextUp: "Επόμενο", noPlayersYet: "Κανείς ακόμα", onBench: "στον πάγκο", each: "το άτομο",
+    syncLive: "Συγχρονισμός ενεργός", syncPreview: "Δοκιμαστική αποθήκευση", syncLocal: "Δεν αποθηκεύεται", syncBad: "Πρόβλημα συγχρονισμού",
+    tipLive: "Οι αλλαγές φαίνονται αμέσως σε όλους.", tipPreview: "Δοκιμαστική αποθήκευση. Σύνδεσε το Firebase πριν το ανεβάσεις.", tipLocal: "Οι αλλαγές χάνονται με ανανέωση. Πρόσθεσε τις ρυθμίσεις Firebase.",
+    newOnDay: "+ Νέα εκδήλωση αυτή τη μέρα", playersN: n => `Παίκτες: ${n}`, benchN: n => `Πάγκος: ${n}`,
+    newEvent: "Νέα εκδήλωση", editEvent: "Επεξεργασία εκδήλωσης", type: "Τύπος", title: "Τίτλος", defTitle: "Κυριακάτικος αγώνας",
+    date: "Ημερομηνία", start: "Έναρξη", end: "Λήξη", field: "Γήπεδο", address: "Διεύθυνση", addressPh: "Οδός, αριθμός, περιοχή",
+    maps: "Σύνδεσμος χάρτη", mapsHint: "Προαιρετικό. Αν μείνει κενό, φτιάχνεται από τη διεύθυνση.",
+    total: "Συνολικό κόστος", totalHint: "Μοιράζεται στην ομάδα.", max: "Μέγιστοι παίκτες", maxHint: "Οι επιπλέον πάνε στον πάγκο.", maxPh: "Χωρίς όριο",
+    bookedBy: "Κράτηση από", bookerPhone: "Τηλέφωνο κράτησης", namePh: "Όνομα", notes: "Σημειώσεις", optional: "Προαιρετικό", notesPh: "Φέρτε σκούρα και λευκή μπλούζα",
+    del: "Διαγραφή", tapDel: "Πάτα ξανά για διαγραφή", cancel: "Ακύρωση", create: "Δημιουργία", save: "Αποθήκευση",
+    pickDate: "Διάλεξε πρώτα ημερομηνία", created: "Η εκδήλωση δημιουργήθηκε", saved: "Οι αλλαγές αποθηκεύτηκαν", deleted: "Η εκδήλωση διαγράφηκε",
+    cantSave: "Δεν αποθηκεύτηκε", cantDelete: "Δεν διαγράφηκε", cantAdd: "Δεν προστέθηκε", cantRemove: "Δεν αφαιρέθηκε", cantMove: "Δεν μετακινήθηκε",
+    guestView: "Προβολή επισκέπτη", edit: "Επεξεργασία", share: "Κοινοποίηση", openMaps: "Άνοιγμα στον χάρτη", fieldDefault: "Γήπεδο",
+    totalBox: "Σύνολο", playersBox: "Παίκτες", ppBox: "Ανά άτομο",
+    squad: "Ομάδα", fullTag: "Γεμάτη", freeTag: n => `Ελεύθερες: ${n}`, bench: "Πάγκος",
+    benchNote: "Περιμένουν θέση. Μπαίνουν στην ομάδα μόνο όταν τους μετακινήσει ο διοργανωτής.",
+    noOne: "Κανείς ακόμα. Πρόσθεσε τον πρώτο παίκτη παρακάτω.", noPhone: "Χωρίς τηλέφωνο",
+    toSquad: "Στην ομάδα", toBench: "Στον πάγκο", remove: "Αφαίρεση από τη λίστα", tapRemove: "Πάτα ξανά για αφαίρεση",
+    removed: "Αφαιρέθηκε από τη λίστα", removedSpot: "Αφαιρέθηκε. Άνοιξε θέση, κάλεσε κάποιον από τον πάγκο.",
+    squadFullMove: "Η ομάδα είναι γεμάτη. Αφαίρεσε κάποιον ή αύξησε το όριο.", movedBench: "Μετακινήθηκε στον πάγκο", movedSquad: "Μετακινήθηκε στην ομάδα",
+    phonePh: "69...", pNotesPh: "π.χ. φίλος του Νίκου", phoneL: "Τηλέφωνο", reqTag: "υποχρεωτικό", optTag: "προαιρετικό", nameMissing: "Γράψε πρώτα ένα όνομα",
+    dup: n => `${n}: υπάρχει ήδη στη λίστα. Πάτα ξανά το κουμπί για να προστεθεί κι άλλος ${n}.`,
+    fullNote: "Η ομάδα γέμισε. Τα νέα ονόματα πάνε στον πάγκο και θα τους καλέσουμε αν κάποιος ακυρώσει.",
+    addPlayer: "Προσθήκη παίκτη", addBench: "Προσθήκη στον πάγκο", addedSquad: n => `${n}: μπήκε στην ομάδα`, addedBench: n => `${n}: μπήκε στον πάγκο`,
+    copyMsg: "Αντιγραφή μηνύματος", sendWA: "Αποστολή στο WhatsApp", more: "Περισσότερα…", copied: "Το μήνυμα αντιγράφηκε", copyManual: "Επίλεξε το κείμενο και αντέγραψέ το",
+    eventGone: "Η εκδήλωση διαγράφηκε", notFound: "Η εκδήλωση δεν βρέθηκε", backCal: "Έξοδος", guestBanner: "Προεπισκόπηση: έτσι το βλέπουν οι φίλοι από τον σύνδεσμο.", loading: "Φόρτωση…",
+    unavailT: "Η εκδήλωση δεν είναι διαθέσιμη", unavailP: "Ίσως διαγράφηκε. Ζήτα νέο σύνδεσμο από τον διοργανωτή.",
+    sTotal: (t, pp, n) => `${t} συνολικά, ${pp} το άτομο (${n} παίκτες)`, sTotalOnly: t => `${t} συνολικά`,
+    sFull: (n, mx) => `Η ομάδα γέμισε (${n}/${mx}). Γράψου στον πάγκο, μήπως ανοίξει θέση`,
+    sSpots: (n, mx) => `${n}/${mx} μέσα, ελεύθερες θέσεις: ${mx - n}`, sJoin: "Γράψε το όνομά σου:",
+    connectFail: "Δεν έγινε σύνδεση με το Firebase. Έλεγξε τις ρυθμίσεις.", syncErr: "Σφάλμα συγχρονισμού"
+  },
+  uk: {
+    _name: "УК",
+    months: ["Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"],
+    monthsGen: ["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"],
+    wd: ["Неділя","Понеділок","Вівторок","Середа","Четвер","Пʼятниця","Субота"],
+    wdShort: ["Пн","Вт","Ср","Чт","Пт","Сб","Нд"],
+    types: { game:"Гра", training:"Тренування", friendly:"Товариський", social:"Зустріч" },
+    dayFmt: (wd, d, m) => `${wd}, ${d} ${m}`,
+    lockSub: "Введи пароль команди, щоб побачити календар", pwPh: "Пароль", wrongPw: "Неправильний пароль. Спробуй ще раз.", unlock: "Увійти",
+    lock: "Вийти", today: "Сьогодні", prevM: "Попередній місяць", nextM: "Наступний місяць", close: "Закрити",
+    nextUp: "Наступна подія", noPlayersYet: "Ще нікого", onBench: "на лавці", each: "з людини",
+    syncLive: "Синхронізовано", syncPreview: "Тестове збереження", syncLocal: "Не зберігається", syncBad: "Помилка синхронізації",
+    tipLive: "Зміни одразу бачать усі.", tipPreview: "Тестове сховище. Підключи Firebase перед публікацією.", tipLocal: "Зміни зникнуть після оновлення. Додай налаштування Firebase.",
+    newOnDay: "+ Нова подія цього дня", playersN: n => `Гравці: ${n}`, benchN: n => `Лавка: ${n}`,
+    newEvent: "Нова подія", editEvent: "Редагувати подію", type: "Тип", title: "Назва", defTitle: "Недільна гра",
+    date: "Дата", start: "Початок", end: "Кінець", field: "Поле", address: "Адреса", addressPh: "Вулиця, номер, район",
+    maps: "Посилання на карту", mapsHint: "Необовʼязково. Якщо порожньо, створиться з адреси.",
+    total: "Загальна ціна", totalHint: "Ділиться між складом.", max: "Макс. гравців", maxHint: "Зайві йдуть на лавку.", maxPh: "Без ліміту",
+    bookedBy: "Забронював", bookerPhone: "Телефон бронювання", namePh: "Імʼя", notes: "Нотатки", optional: "Необовʼязково", notesPh: "Візьміть темну і білу футболку",
+    del: "Видалити", tapDel: "Натисни ще раз, щоб видалити", cancel: "Скасувати", create: "Створити подію", save: "Зберегти",
+    pickDate: "Спочатку вибери дату", created: "Подію створено", saved: "Зміни збережено", deleted: "Подію видалено",
+    cantSave: "Не вдалося зберегти", cantDelete: "Не вдалося видалити", cantAdd: "Не вдалося додати", cantRemove: "Не вдалося видалити", cantMove: "Не вдалося перемістити",
+    guestView: "Як гість", edit: "Редагувати", share: "Поділитися", openMaps: "Відкрити на карті", fieldDefault: "Поле",
+    totalBox: "Разом", playersBox: "Гравці", ppBox: "З людини",
+    squad: "Склад", fullTag: "Заповнено", freeTag: n => `Вільно: ${n}`, bench: "Лавка",
+    benchNote: "Чекають на місце. Потрапляють до складу, лише коли організатор їх перемістить.",
+    noOne: "Ще нікого. Додай першого гравця нижче.", noPhone: "Немає телефону",
+    toSquad: "До складу", toBench: "На лавку", remove: "Видалити зі списку", tapRemove: "Натисни ще раз, щоб видалити",
+    removed: "Видалено зі списку", removedSpot: "Видалено. Звільнилося місце, поклич когось з лавки.",
+    squadFullMove: "Склад заповнено. Спочатку видали когось або збільш ліміт.", movedBench: "Переміщено на лавку", movedSquad: "Переміщено до складу",
+    phonePh: "69...", pNotesPh: "напр. друг Нікоса", phoneL: "Телефон", reqTag: "обовʼязково", optTag: "необовʼязково", nameMissing: "Спочатку напиши імʼя",
+    dup: n => `${n} вже є у списку. Натисни кнопку ще раз, щоб додати ще одного ${n}.`,
+    fullNote: "Склад заповнено. Нові імена йдуть на лавку, і їх покличуть, якщо хтось відмовиться.",
+    addPlayer: "Додати гравця", addBench: "Додати на лавку", addedSquad: n => `${n} у складі`, addedBench: n => `${n} на лавці`,
+    copyMsg: "Копіювати", sendWA: "Надіслати у WhatsApp", more: "Ще…", copied: "Скопійовано", copyManual: "Виділи текст і скопіюй",
+    eventGone: "Подію видалено", notFound: "Подію не знайдено", backCal: "Вийти", guestBanner: "Попередній перегляд: так це бачать друзі за посиланням.", loading: "Завантаження…",
+    unavailT: "Подія недоступна", unavailP: "Можливо, її видалено. Попроси в організатора нове посилання.",
+    sTotal: (t, pp, n) => `${t} разом, ${pp} з людини (гравців: ${n})`, sTotalOnly: t => `${t} разом`,
+    sFull: (n, mx) => `Склад заповнено (${n}/${mx}). Запишися на лавку, раптом звільниться місце`,
+    sSpots: (n, mx) => `${n}/${mx} записано, вільних місць: ${mx - n}`, sJoin: "Запишись тут:",
+    connectFail: "Не вдалося підключитися до Firebase. Перевір налаштування.", syncErr: "Помилка синхронізації"
+  }
+};
+function pickLang(){
+  let saved = null; try { saved = localStorage.getItem("fc_lang"); } catch {}
+  if (saved && I18N[saved]) return saved;
+  if (CONFIG.DEFAULT_LANGUAGE && I18N[CONFIG.DEFAULT_LANGUAGE]) return CONFIG.DEFAULT_LANGUAGE;
+  const nav = (navigator.language || "en").toLowerCase();
+  if (nav.startsWith("el")) return "el";
+  if (nav.startsWith("uk")) return "uk";
+  return "en";
+}
+let LANG = pickLang();
+const L = () => I18N[LANG];
+const T = (k, ...a) => { const v = I18N[LANG][k] ?? I18N.en[k]; return typeof v === "function" ? v(...a) : v; };
+const typeName = k => L().types[k] || L().types.game;
+document.documentElement.lang = LANG;
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const ymd = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+const parseYmd = s => { const [a, b, c] = s.split("-").map(Number); return new Date(a, b - 1, c); };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const TYPE_KEYS = ["game","training","friendly","social"];
+const now = new Date();
+const TODAY = ymd(now.getFullYear(), now.getMonth(), now.getDate());
+const fmtDay = d => L().dayFmt(L().wd[d.getDay()], d.getDate(), L().monthsGen[d.getMonth()]);
+
+function money(n){ if (n == null || n === "" || isNaN(n)) return "—"; const v = Math.round(Number(n) * 100) / 100; return CONFIG.CURRENCY + (Number.isInteger(v) ? v : v.toFixed(2)); }
+const squad = e => (e.players || []).filter(p => !p.bench);
+const benchOf = e => (e.players || []).filter(p => p.bench);
+const maxOf = e => { const m = parseInt(e.maxPlayers, 10); return m > 0 ? m : null; };
+const isFull = e => { const m = maxOf(e); return !!(m && squad(e).length >= m); };
+function placePlayer(e, p){ return { ...p, bench: isFull(e) }; }
+function movedList(e, pid, toBench){ const pl = e.players || [], p = pl.find(x => x.id === pid); if (!p) return pl; return [...pl.filter(x => x.id !== pid), { ...p, bench: toBench }]; }
+function perPerson(e){ const n = squad(e).length; const t = parseFloat(e.total); if (!t || !n) return null; return t / n; }
+function timeRange(e){ return e.start && e.end ? `${e.start}–${e.end}` : (e.start || ""); }
+function mapsLink(e){ if (e.mapsUrl) return /^https?:\/\//i.test(e.mapsUrl) ? e.mapsUrl : "https://" + e.mapsUrl;
+  const q = [e.field, e.address].filter(Boolean).join(", "); return q ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q) : ""; }
+function telHref(p){ return "tel:" + String(p).replace(/[^\d+]/g, ""); }
+function waHref(p){
+  const raw = String(p).trim(); let s = raw;
+  if (s.startsWith("+")) s = s.slice(1); else if (s.startsWith("00")) s = s.slice(2);
+  s = s.replace(/\D/g, "");
+  if (!raw.startsWith("+") && !raw.startsWith("00") && s.length <= 10 && CONFIG.DEFAULT_COUNTRY_CODE) s = CONFIG.DEFAULT_COUNTRY_CODE + s;
+  return "https://wa.me/" + s;
+}
+function phoneLinks(p){ if (!p) return ""; return `<span class="phl"><a href="${telHref(p)}">${esc(p)}</a><a href="${waHref(p)}" target="_blank" rel="noopener">WhatsApp</a></span>`; }
+function baseUrl(){ return location.href.split("#")[0].split("?")[0]; }
+function eventUrl(id){ return baseUrl() + "?event=" + encodeURIComponent(id); }
+let toastT;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2400); }
+function safeGet(k){ try { return localStorage.getItem(k); } catch { return null; } }
+function safeSet(k, v){ try { localStorage.setItem(k, v); } catch {} }
+function langSwitch(){ return `<div class="langsw" role="group" aria-label="Language">${Object.keys(I18N).map(k =>
+  `<button data-lang="${k}" class="${k === LANG ? "on" : ""}" aria-pressed="${k === LANG}">${I18N[k]._name}</button>`).join("")}</div>`; }
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-lang]"); if (!b) return;
+  if (b.dataset.lang === LANG) return;
+  LANG = b.dataset.lang; safeSet("fc_lang", LANG); document.documentElement.lang = LANG;
+  const reopen = modalKind === "event" ? sheet.dataset.id : null;
+  closeModal(); route(); if (reopen) openEvent(reopen);
+});
+
+/* ============================================================
+   Storage — Firebase (deployed), Claude preview storage, or memory
+   ============================================================ */
+function loadScript(src){ return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("Failed to load " + src)); document.head.appendChild(s); }); }
+
+async function makeFirebaseStore(cfg){
+  const V = "10.12.2";
+  await loadScript(`https://www.gstatic.com/firebasejs/${V}/firebase-app-compat.js`);
+  await loadScript(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore-compat.js`);
+  firebase.initializeApp(cfg);
+  const db = firebase.firestore();
+  const col = db.collection("events");
+  return {
+    mode: "firebase",
+    async save(id, fields){ await col.doc(id).set(fields, { merge: true }); },
+    async addPlayer(id, p){
+      const ref = col.doc(id); let out;
+      await db.runTransaction(async t => { const s = await t.get(ref); if (!s.exists) throw new Error(T("notFound"));
+        const d = s.data(); out = placePlayer(d, p); t.update(ref, { players: [...(d.players || []), out] }); });
+      return out;
+    },
+    async movePlayer(id, pid, toBench){
+      const ref = col.doc(id);
+      await db.runTransaction(async t => { const s = await t.get(ref); if (!s.exists) return; t.update(ref, { players: movedList(s.data(), pid, toBench) }); });
+    },
+    async removePlayer(id, pid){
+      const ref = col.doc(id);
+      await db.runTransaction(async t => { const s = await t.get(ref); if (!s.exists) return;
+        t.update(ref, { players: (s.data().players || []).filter(p => p.id !== pid) }); });
+    },
+    async remove(id){ await col.doc(id).delete(); },
+    subscribe(cb){ col.onSnapshot(s => cb(s.docs.map(d => ({ ...d.data(), id: d.id }))), err => { toast(T("syncErr") + ": " + err.message); setSync("bad"); }); }
+  };
+}
+
+function makePreviewStore(){
+  const S = window.storage, P = "fcevt:";
+  const get = async id => { try { const r = await S.get(P + id, true); return r ? JSON.parse(r.value) : null; } catch { return null; } };
+  const put = e => S.set(P + e.id, JSON.stringify(e), true);
+  async function list(){
+    let r; try { r = await S.list(P, true); } catch { return []; }
+    const keys = (r && r.keys) || [];
+    const out = await Promise.all(keys.map(k => { const key = typeof k === "string" ? k : k.key;
+      return S.get(key, true).then(x => x ? JSON.parse(x.value) : null).catch(() => null); }));
+    return out.filter(Boolean);
+  }
+  let subs = [];
+  const refresh = async () => { const l = await list(); subs.forEach(f => f(l)); };
+  return {
+    mode: "preview",
+    async save(id, fields){ const e = (await get(id)) || { id }; Object.assign(e, fields, { id }); await put(e); await refresh(); },
+    async addPlayer(id, p){ const e = await get(id); if (!e) throw new Error(T("notFound")); const out = placePlayer(e, p); e.players = [...(e.players || []), out]; await put(e); await refresh(); return out; },
+    async movePlayer(id, pid, toBench){ const e = await get(id); if (!e) return; e.players = movedList(e, pid, toBench); await put(e); await refresh(); },
+    async removePlayer(id, pid){ const e = await get(id); if (!e) return; e.players = (e.players || []).filter(x => x.id !== pid); await put(e); await refresh(); },
+    async remove(id){ try { await S.delete(P + id, true); } catch {} await refresh(); },
+    subscribe(cb){ subs.push(cb); refresh(); setInterval(refresh, 6000); }
+  };
+}
+
+function makeMemoryStore(){
+  const m = new Map(); let subs = [];
+  const emit = () => subs.forEach(f => f([...m.values()].map(e => JSON.parse(JSON.stringify(e)))));
+  return {
+    mode: "local",
+    async save(id, fields){ m.set(id, Object.assign(m.get(id) || { id }, fields, { id })); emit(); },
+    async addPlayer(id, p){ const e = m.get(id); if (!e) throw new Error(T("notFound")); const out = placePlayer(e, p); e.players = [...(e.players || []), out]; emit(); return out; },
+    async movePlayer(id, pid, toBench){ const e = m.get(id); if (e) { e.players = movedList(e, pid, toBench); emit(); } },
+    async removePlayer(id, pid){ const e = m.get(id); if (e) { e.players = (e.players || []).filter(x => x.id !== pid); emit(); } },
+    async remove(id){ m.delete(id); emit(); },
+    subscribe(cb){ subs.push(cb); emit(); }
+  };
+}
+
+async function initStore(){
+  if (CONFIG.FIREBASE && CONFIG.FIREBASE.apiKey) {
+    try { return await makeFirebaseStore(CONFIG.FIREBASE); }
+    catch (e) { console.error(e); toast(T("connectFail")); }
+  }
+  if (window.storage && typeof window.storage.get === "function") return makePreviewStore();
+  return makeMemoryStore();
+}
+
+/* ============================================================
+   State
+   ============================================================ */
+let store, events = [], loaded = false;
+let view = { y: now.getFullYear(), m: now.getMonth() };
+let publicId = new URLSearchParams(location.search).get("event");
+let guestFromAdmin = false;
+const pwOk = v => String(v || "").trim().toLowerCase() === CONFIG.ADMIN_PASSWORD.trim().toLowerCase();
+let unlocked = pwOk(safeGet("fc_unlocked"));
+let modalKind = null;
+let syncState = "ok";
+const app = $("#app"), ov = $("#ov"), sheet = $("#sheet");
+
+function setSync(state){ if (state) syncState = state; const el = $("#sync"); if (!el) return;
+  const mode = store ? store.mode : "";
+  const txt = syncState === "bad" ? T("syncBad") : mode === "firebase" ? T("syncLive") : mode === "preview" ? T("syncPreview") : T("syncLocal");
+  el.className = "sync" + (syncState === "bad" ? " bad" : mode === "local" ? " warn" : "");
+  el.innerHTML = `<i></i>${esc(txt)}`;
+  el.title = mode === "preview" ? T("tipPreview") : mode === "local" ? T("tipLocal") : T("tipLive");
+}
+
+/* ============================================================
+   Routing
+   ============================================================ */
+function route(){
+  if (publicId) renderPublic();
+  else if (unlocked) renderAdmin();
+  else renderLock();
+}
+function onData(){
+  if (publicId) updatePublic();
+  else if (unlocked) { renderCalendar(); renderNext(); refreshModal(); }
+}
+
+/* ---------- Lock ---------- */
+function renderLock(){
+  app.innerHTML = `
+  <div class="center"><div class="card lock">
+    <div class="lockl">${langSwitch()}</div>
+    <h1>${esc(CONFIG.TEAM_NAME)}</h1>
+    <div class="sub">${esc(T("lockSub"))}</div>
+    <div class="lockf">
+      <input type="password" id="pw" placeholder="${esc(T("pwPh"))}" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" autofocus>
+      <div class="err" id="pwerr"></div>
+      <button class="btn primary" id="unlockb">${esc(T("unlock"))}</button>
+    </div>
+  </div></div>`;
+  const tryUnlock = () => {
+    if (pwOk($("#pw").value)) { unlocked = true; safeSet("fc_unlocked", CONFIG.ADMIN_PASSWORD); renderAdmin(); }
+    else { $("#pwerr").textContent = T("wrongPw"); $("#pw").select(); }
+  };
+  $("#unlockb").onclick = tryUnlock;
+  $("#pw").onkeydown = e => { if (e.key === "Enter") tryUnlock(); };
+}
+
+/* ---------- Admin ---------- */
+function renderAdmin(){
+  app.innerHTML = `
+  <div class="wrap">
+    <div class="topbar">
+      <h1>${esc(CONFIG.TEAM_NAME)}</h1>
+      <div class="topacts">${langSwitch()}<span id="sync" class="sync"></span><button class="btn sm" id="lockbtn">${esc(T("lock"))}</button></div>
+    </div>
+    <div class="nav">
+      <button class="navbtn" id="prev" aria-label="${esc(T("prevM"))}">‹</button>
+      <div class="navmid"><div class="navtitle" id="mtitle"></div><button class="linkbtn" id="todayb">${esc(T("today"))}</button></div>
+      <button class="navbtn" id="nextb" aria-label="${esc(T("nextM"))}">›</button>
+    </div>
+    <div class="cal">
+      <div class="cal-h">${L().wdShort.map(d => `<div>${esc(d)}</div>`).join("")}</div>
+      <div class="cal-g" id="grid"></div>
+    </div>
+    <div class="legend">${TYPE_KEYS.map(k => `<span><i class="t-${k}"></i>${esc(typeName(k))}</span>`).join("")}</div>
+    <div id="nextwrap"></div>
+  </div>`;
+  $("#prev").onclick = () => { view.m--; if (view.m < 0) { view.m = 11; view.y--; } renderCalendar(); };
+  $("#nextb").onclick = () => { view.m++; if (view.m > 11) { view.m = 0; view.y++; } renderCalendar(); };
+  $("#todayb").onclick = () => { view = { y: now.getFullYear(), m: now.getMonth() }; renderCalendar(); };
+  $("#lockbtn").onclick = () => { unlocked = false; safeSet("fc_unlocked", ""); closeModal(); renderLock(); };
+  $("#grid").onclick = e => {
+    const chip = e.target.closest(".chip"); if (chip) { openEvent(chip.dataset.id); return; }
+    const day = e.target.closest(".day"); if (day && day.dataset.date) openDay(day.dataset.date);
+  };
+  setSync(); renderCalendar(); renderNext();
+}
+
+function eventsOn(ds){ return events.filter(e => e.date === ds).sort((a, b) => (a.start || "").localeCompare(b.start || "")); }
+const countLabel = e => squad(e).length + (maxOf(e) ? "/" + maxOf(e) : "");
+
+function renderCalendar(){
+  const grid = $("#grid"); if (!grid) return;
+  const { y, m } = view;
+  $("#mtitle").textContent = `${L().months[m]} ${y}`;
+  const offset = (new Date(y, m, 1).getDay() + 6) % 7;
+  const days = new Date(y, m + 1, 0).getDate();
+  const total = Math.ceil((offset + days) / 7) * 7;
+  let h = "";
+  for (let i = 0; i < total; i++) {
+    const d = i - offset + 1;
+    if (d < 1 || d > days) { h += `<div class="day blank"></div>`; continue; }
+    const ds = ymd(y, m, d), evs = eventsOn(ds), col = i % 7;
+    h += `<div class="day${col === 6 ? " sun" : ""}${ds === TODAY ? " today" : ""}${evs.length ? " has" : ""}" data-date="${ds}" role="button" tabindex="0" aria-label="${d} ${esc(L().monthsGen[m])}">
+      <span class="dn">${d}</span>
+      ${evs.map(e => { const n = countLabel(e); return `<button class="chip t-${e.type || "game"}" data-id="${e.id}">
+        <span class="ct">${esc(e.title || typeName(e.type))}</span><small>${esc(e.start || "")} · 👥 ${n}</small><span class="cn">${n}</span></button>`; }).join("")}
+    </div>`;
+  }
+  grid.innerHTML = h;
+  grid.querySelectorAll(".day[data-date]").forEach(el => el.onkeydown = e => { if (e.key === "Enter" && e.target === el) openDay(el.dataset.date); });
+}
+
+function renderNext(){
+  const w = $("#nextwrap"); if (!w) return;
+  const ev = events.filter(e => e.date >= TODAY).sort((a, b) => (a.date + (a.start || "")).localeCompare(b.date + (b.start || "")))[0];
+  if (!ev) { w.innerHTML = ""; return; }
+  const d = parseYmd(ev.date), pl = squad(ev), bn = benchOf(ev).length, pp = perPerson(ev);
+  w.innerHTML = `<div class="next-label">${esc(T("nextUp"))}</div>
+  <button class="next t-${ev.type || "game"}" data-id="${ev.id}">
+    <div class="next-top"><span class="next-title">${esc(ev.title || typeName(ev.type))}</span>
+    <span class="next-when">${esc(fmtDay(d))}, ${esc(timeRange(ev))}${pp ? `, ${money(pp)} ${esc(T("each"))}` : ""}</span></div>
+    <div class="players" style="margin:10px 0 0">${pl.length ? pl.map(p => `<span class="pchip"><span class="pn">✓</span>${esc(p.name)}</span>`).join("") : `<span class="empty">${esc(T("noPlayersYet"))}</span>`}${bn ? `<span class="pchip bench"><span class="pn">${bn}</span>${esc(T("onBench"))}</span>` : ""}</div>
+  </button>`;
+  w.querySelector(".next").onclick = () => openEvent(ev.id);
+}
+
+/* ---------- Modal ---------- */
+function showOverlay(){ ov.classList.remove("hidden"); document.body.style.overflow = "hidden"; }
+function closeModal(){ ov.classList.add("hidden"); sheet.innerHTML = ""; sheet.onclick = null; modalKind = null; document.body.style.overflow = ""; }
+ov.addEventListener("click", e => { if (e.target === ov) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && modalKind) closeModal(); });
+
+function refreshModal(){
+  if (modalKind !== "event") return;
+  const ev = events.find(x => x.id === sheet.dataset.id);
+  if (!ev) { closeModal(); toast(T("eventGone")); return; }
+  updateEventView(sheet, ev);
+}
+
+function openDay(ds){
+  const evs = eventsOn(ds);
+  if (!evs.length) { openForm(null, ds); return; }
+  const d = parseYmd(ds);
+  modalKind = "day"; sheet.onclick = null;
+  sheet.innerHTML = `
+    <div class="fhead"><h3>${esc(fmtDay(d))}</h3><button class="x" id="dx" aria-label="${esc(T("close"))}">✕</button></div>
+    <div class="daylist">${evs.map(e => `<button class="chip t-${e.type || "game"}" data-id="${e.id}"><span class="ct">${esc(e.title || typeName(e.type))}</span>
+      <small>${esc(timeRange(e))} · ${esc(T("playersN", countLabel(e)))}${benchOf(e).length ? ` · ${esc(T("benchN", benchOf(e).length))}` : ""}${e.field ? " · " + esc(e.field) : ""}</small></button>`).join("")}</div>
+    <button class="btn primary" id="dnew" style="width:100%">${esc(T("newOnDay"))}</button>`;
+  $("#dx").onclick = closeModal;
+  $("#dnew").onclick = () => openForm(null, ds);
+  sheet.querySelectorAll(".daylist .chip").forEach(b => b.onclick = () => openEvent(b.dataset.id));
+  showOverlay();
+}
+
+function openEvent(id){
+  const ev = events.find(x => x.id === id); if (!ev) { toast(T("notFound")); return; }
+  modalKind = "event";
+  mountEventView(sheet, ev, { admin: true, inModal: true });
+  showOverlay();
+  sheet.scrollTop = 0;
+}
+
+/* ---------- Event form ---------- */
+function defaultsFor(date){
+  const last = [...events].sort((a, b) => (b.date + (b.start || "")).localeCompare(a.date + (a.start || "")))[0] || {};
+  return { type: last.type || "game", title: last.title || T("defTitle"), date, start: last.start || "20:00", end: last.end || "22:00",
+    maxPlayers: last.maxPlayers ?? "", field: last.field || "", address: last.address || "", mapsUrl: last.mapsUrl || "", total: last.total ?? "",
+    bookerName: last.bookerName || "", bookerPhone: last.bookerPhone || "", notes: "" };
+}
+
+function openForm(ev, date){
+  const isNew = !ev;
+  const v = ev || defaultsFor(date);
+  modalKind = "form"; sheet.onclick = null;
+  sheet.innerHTML = `
+  <div class="fhead"><h3>${esc(isNew ? T("newEvent") : T("editEvent"))}</h3><button class="x" id="fx" aria-label="${esc(T("close"))}">✕</button></div>
+  <div class="form" id="evForm">
+    <div class="grid2">
+      <label>${esc(T("type"))}<select name="type">${TYPE_KEYS.map(k => `<option value="${k}"${v.type === k ? " selected" : ""}>${esc(typeName(k))}</option>`).join("")}</select></label>
+      <label>${esc(T("title"))}<input name="title" value="${esc(v.title)}" placeholder="${esc(T("defTitle"))}"></label>
+    </div>
+    <div class="grid3">
+      <label>${esc(T("date"))}<input type="date" name="date" value="${esc(v.date)}"></label>
+      <label>${esc(T("start"))}<input type="time" name="start" value="${esc(v.start)}"></label>
+      <label>${esc(T("end"))}<input type="time" name="end" value="${esc(v.end)}"></label>
+    </div>
+    <label>${esc(T("field"))}<input name="field" value="${esc(v.field)}" placeholder="Kallithea 5x5"></label>
+    <label>${esc(T("address"))}<input name="address" value="${esc(v.address)}" placeholder="${esc(T("addressPh"))}"></label>
+    <label>${esc(T("maps"))} <small>${esc(T("mapsHint"))}</small><input name="mapsUrl" value="${esc(v.mapsUrl)}" placeholder="https://maps.app.goo.gl/..." inputmode="url"></label>
+    <div class="grid2">
+      <label>${esc(T("total"))} (${CONFIG.CURRENCY}) <small>${esc(T("totalHint"))}</small><input name="total" type="number" min="0" step="0.5" inputmode="decimal" value="${esc(v.total)}" placeholder="90"></label>
+      <label>${esc(T("max"))} <small>${esc(T("maxHint"))}</small><input name="maxPlayers" type="number" min="1" step="1" inputmode="numeric" value="${esc(v.maxPlayers)}" placeholder="${esc(T("maxPh"))}"></label>
+    </div>
+    <div class="grid2">
+      <label>${esc(T("bookedBy"))}<input name="bookerName" value="${esc(v.bookerName)}" placeholder="${esc(T("namePh"))}"></label>
+      <label>${esc(T("bookerPhone"))}<input name="bookerPhone" type="tel" value="${esc(v.bookerPhone)}" placeholder="69..."></label>
+    </div>
+    <label>${esc(T("notes"))} <small>${esc(T("optional"))}</small><textarea name="notes" rows="2" placeholder="${esc(T("notesPh"))}">${esc(v.notes)}</textarea></label>
+    <div class="btnrow">
+      ${isNew ? "" : `<button type="button" class="btn danger" id="fdel">${esc(T("del"))}</button>`}
+      <span class="grow"></span>
+      <button type="button" class="btn" id="fcancel">${esc(T("cancel"))}</button>
+      <button class="btn primary" id="fsave">${esc(isNew ? T("create") : T("save"))}</button>
+    </div>
+  </div>`;
+  const back = () => isNew ? closeModal() : openEvent(ev.id);
+  $("#fx").onclick = closeModal;
+  $("#fcancel").onclick = back;
+  if (!isNew) {
+    const del = $("#fdel");
+    del.onclick = async () => {
+      if (!del.dataset.armed) { del.dataset.armed = 1; del.textContent = T("tapDel"); setTimeout(() => { if (del.isConnected) { delete del.dataset.armed; del.textContent = T("del"); } }, 3000); return; }
+      del.disabled = true;
+      try { await store.remove(ev.id); events = events.filter(x => x.id !== ev.id); closeModal(); onData(); toast(T("deleted")); }
+      catch (e) { toast(T("cantDelete") + ": " + e.message); del.disabled = false; }
+    };
+  }
+  $("#fsave").onclick = async () => {
+    const box = $("#evForm"), val = k => String(box.querySelector(`[name="${k}"]`).value || "").trim(), f = {};
+    ["type","title","date","start","end","field","address","mapsUrl","bookerName","bookerPhone","notes"].forEach(k => f[k] = val(k));
+    if (!f.date) { toast(T("pickDate")); return; }
+    const t = val("total"); f.total = t === "" ? null : Number(t);
+    const mx = parseInt(val("maxPlayers"), 10); f.maxPlayers = mx > 0 ? mx : null;
+    f.updatedAt = Date.now();
+    const id = isNew ? uid() : ev.id;
+    if (isNew) { f.players = []; f.createdAt = Date.now(); }
+    const btn = $("#fsave"); btn.disabled = true;
+    try {
+      await store.save(id, f);
+      const i = events.findIndex(x => x.id === id);
+      if (i >= 0) events[i] = { ...events[i], ...f }; else events.push({ id, ...f });
+      const [yy, mm] = f.date.split("-").map(Number); view = { y: yy, m: mm - 1 };
+      renderCalendar(); renderNext();
+      openEvent(id);
+      toast(isNew ? T("created") : T("saved"));
+    } catch (err) { toast(T("cantSave") + ": " + err.message); btn.disabled = false; }
+  };
+  showOverlay();
+  sheet.scrollTop = 0;
+}
+
+/* ---------- Event view (used in admin modal and public page) ---------- */
+function mountEventView(root, ev, opts){
+  root.dataset.id = ev.id;
+  root._opts = opts; root._sel = null;
+  root.innerHTML = `
+  <div class="ev">
+    <div class="ev-top"></div>
+    <div class="sharebox hidden"></div>
+    <div class="sec squadh"></div>
+    <div class="players squadl"></div>
+    <div class="benchwrap"></div>
+    <div class="pdetail"></div>
+    <div class="addp">
+      <label class="fl"><span class="flt">${esc(T("namePh"))} <span class="req">${esc(T("reqTag"))}</span></span>
+        <input name="pname" maxlength="40" autocomplete="off" required aria-required="true"></label>
+      <div class="err hidden" id="namerr">${esc(T("nameMissing"))}</div>
+      <div class="grid2">
+        <label class="fl"><span class="flt">${esc(T("phoneL"))} <span class="opt">${esc(T("optTag"))}</span></span>
+          <input name="pphone" type="tel" placeholder="${esc(T("phonePh"))}" autocomplete="off"></label>
+        <label class="fl"><span class="flt">${esc(T("notes"))} <span class="opt">${esc(T("optTag"))}</span></span>
+          <input name="pnotes" placeholder="${esc(T("pNotesPh"))}" maxlength="80" autocomplete="off"></label>
+      </div>
+      <div class="warn hidden" id="dupwarn"></div>
+      <div class="fullnote hidden">${esc(T("fullNote"))}</div>
+      <button class="btn primary" id="addpb">${esc(T("addPlayer"))}</button>
+    </div>
+  </div>`;
+  const cur = () => events.find(x => x.id === root.dataset.id);
+
+  root.onclick = async e => {
+    const pc = e.target.closest(".pchip");
+    if (pc && root.contains(pc) && pc.dataset.pid) { root._sel = root._sel === pc.dataset.pid ? null : pc.dataset.pid; updateEventView(root, cur()); return; }
+    const a = e.target.closest("[data-act]"); if (!a) return;
+    const ev = cur(); if (!ev) return;
+    const act = a.dataset.act;
+    if (act === "close") closeModal();
+    else if (act === "edit") openForm(ev);
+    else if (act === "guest") { closeModal(); publicId = ev.id; guestFromAdmin = true; renderPublic(); }
+    else if (act === "share") toggleShare(root, ev);
+    else if (act === "pclose") { root._sel = null; updateEventView(root, ev); }
+    else if (act === "rmp") {
+      if (!a.dataset.armed) { a.dataset.armed = 1; a.textContent = T("tapRemove"); setTimeout(() => { if (a.isConnected) { delete a.dataset.armed; a.textContent = T("remove"); } }, 3000); return; }
+      a.disabled = true;
+      const was = (ev.players || []).find(p => p.id === a.dataset.pid);
+      try { await store.removePlayer(ev.id, a.dataset.pid); root._sel = null;
+        toast(was && !was.bench && benchOf(ev).length ? T("removedSpot") : T("removed")); }
+      catch (err) { toast(T("cantRemove") + ": " + err.message); a.disabled = false; }
+    }
+    else if (act === "tosquad" || act === "tobench") {
+      const toBench = act === "tobench";
+      if (!toBench && isFull(ev)) { toast(T("squadFullMove")); return; }
+      a.disabled = true;
+      try { await store.movePlayer(ev.id, a.dataset.pid, toBench); toast(toBench ? T("movedBench") : T("movedSquad")); }
+      catch (err) { toast(T("cantMove") + ": " + err.message); a.disabled = false; }
+    }
+    else if (act === "copy") copyShare(root);
+    else if (act === "native") { try { await navigator.share({ title: ev.title || typeName(ev.type), text: shareText(ev), url: eventUrl(ev.id) }); } catch {} }
+  };
+
+  const form = root.querySelector(".addp");
+  const fld = n => form.querySelector(`[name="${n}"]`);
+  const addPlayer = async () => {
+    const ev = cur(); if (!ev) return;
+    const name = fld("pname").value.trim().replace(/\s+/g, " ");
+    if (!name) { fld("pname").classList.add("invalid"); form.querySelector("#namerr").classList.remove("hidden"); fld("pname").focus(); return; }
+    const warn = form.querySelector("#dupwarn");
+    const dup = (ev.players || []).some(p => p.name.toLowerCase() === name.toLowerCase());
+    if (dup && form.dataset.dup !== name.toLowerCase()) {
+      form.dataset.dup = name.toLowerCase();
+      warn.textContent = T("dup", name); warn.classList.remove("hidden"); return;
+    }
+    const btn = form.querySelector("#addpb"); btn.disabled = true;
+    const p = { id: uid(), name, phone: fld("pphone").value.trim(), notes: fld("pnotes").value.trim(), addedAt: Date.now() };
+    try {
+      const out = await store.addPlayer(ev.id, p);
+      ["pname","pphone","pnotes"].forEach(n => fld(n).value = ""); delete form.dataset.dup; warn.classList.add("hidden");
+      toast(out && out.bench ? T("addedBench", name) : T("addedSquad", name));
+    } catch (err) { toast(T("cantAdd") + ": " + err.message); }
+    btn.disabled = false;
+  };
+  form.querySelector("#addpb").onclick = addPlayer;
+  fld("pname").oninput = () => { fld("pname").classList.remove("invalid"); form.querySelector("#namerr").classList.add("hidden"); };
+  ["pname","pphone","pnotes"].forEach(n => fld(n).onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); addPlayer(); } });
+  updateEventView(root, ev);
+}
+
+function chipHtml(root, p, label, bench){
+  return `<button class="pchip${bench ? " bench" : ""}${root._sel === p.id ? " on" : ""}" data-pid="${p.id}" aria-expanded="${root._sel === p.id}">
+    <span class="pn">${label}</span>${esc(p.name)}${p.phone || p.notes ? `<span class="dot" aria-hidden="true"></span>` : ""}</button>`;
+}
+
+function updateEventView(root, ev){
+  if (!ev) return;
+  const { admin, inModal } = root._opts || {};
+  const d = parseYmd(ev.date), pl = squad(ev), bn = benchOf(ev), mx = maxOf(ev), full = isFull(ev), pp = perPerson(ev), map = mapsLink(ev);
+  const type = ev.type || "game";
+  root.querySelector(".ev-top").innerHTML = `
+    <div class="ev-head">
+      <div class="ev-date"><span class="dnum">${d.getDate()}</span>
+        <div><div class="dmon">${esc(L().monthsGen[d.getMonth()])}</div><div class="dsub">${esc(L().wd[d.getDay()])}, ${d.getFullYear()}</div></div></div>
+      ${inModal ? `<button class="x" data-act="close" aria-label="${esc(T("close"))}">✕</button>` : ""}
+    </div>
+    <div class="ev-row"><span class="badge t-${type}">${esc(typeName(type))}</span>
+      <div class="acts">
+        ${admin ? `<button class="btn sm" data-act="guest">${esc(T("guestView"))}</button><button class="btn sm" data-act="edit">${esc(T("edit"))}</button>` : ""}
+        <button class="btn sm share" data-act="share">${esc(T("share"))}</button>
+      </div></div>
+    <h2 class="ev-title">${esc(ev.title || typeName(type))}</h2>
+    <div class="ev-time">${esc(timeRange(ev))}</div>
+    <div class="info">
+      ${ev.field || ev.address ? `<div class="irow"><span class="ic">📍</span><div><b>${esc(ev.field || T("fieldDefault"))}</b>
+        ${ev.address ? `<div class="muted">${esc(ev.address)}</div>` : ""}
+        ${map ? `<a href="${esc(map)}" target="_blank" rel="noopener">${esc(T("openMaps"))}</a>` : ""}</div></div>` : ""}
+      ${ev.bookerName || ev.bookerPhone ? `<div class="irow"><span class="ic">📞</span><div><span class="muted">${esc(T("bookedBy"))}</span> <b>${esc(ev.bookerName)}</b>${phoneLinks(ev.bookerPhone)}</div></div>` : ""}
+      ${ev.notes ? `<div class="irow"><span class="ic">📝</span><div>${esc(ev.notes)}</div></div>` : ""}
+    </div>
+    <div class="money">
+      <div><span>${esc(T("totalBox"))}</span><b>${ev.total ? money(ev.total) : "—"}</b></div>
+      <div><span>${esc(T("playersBox"))}</span><b>${pl.length}${mx ? `<em class="of">/${mx}</em>` : ""}</b></div>
+      <div class="pp"><span>${esc(T("ppBox"))}</span><b>${pp != null ? money(pp) : "—"}</b></div>
+    </div>`;
+  root.querySelector(".squadh").innerHTML = `${esc(T("squad"))}${mx ? ` <span class="tag ${full ? "full" : "open"}">${esc(full ? T("fullTag") : T("freeTag", mx - pl.length))}</span>` : ""}`;
+  root.querySelector(".squadl").innerHTML = pl.length
+    ? pl.map((p, i) => chipHtml(root, p, i + 1, false)).join("")
+    : `<div class="empty">${esc(T("noOne"))}</div>`;
+  root.querySelector(".benchwrap").innerHTML = bn.length ? `
+    <div class="sec">${esc(T("bench"))} <span class="tag" style="background:var(--yellow);color:var(--ink)">${bn.length}</span></div>
+    <div class="benchnote">${esc(T("benchNote"))}</div>
+    <div class="players">${bn.map((p, i) => chipHtml(root, p, "B" + (i + 1), true)).join("")}</div>` : "";
+  root.querySelector(".fullnote").classList.toggle("hidden", !full);
+  root.querySelector("#addpb").textContent = full ? T("addBench") : T("addPlayer");
+  const sel = (ev.players || []).find(p => p.id === root._sel);
+  if (!sel) root._sel = null;
+  root.querySelector(".pdetail").innerHTML = sel ? `
+    <div class="pcard">
+      <div class="pc-head"><b>${esc(sel.name)}</b><button class="x" data-act="pclose" aria-label="${esc(T("close"))}">✕</button></div>
+      ${sel.phone ? `<div class="prow">📱 <a href="${telHref(sel.phone)}">${esc(sel.phone)}</a> &nbsp; <a href="${waHref(sel.phone)}" target="_blank" rel="noopener">WhatsApp</a></div>` : `<div class="prow muted">${esc(T("noPhone"))}</div>`}
+      ${sel.notes ? `<div class="prow">📝 ${esc(sel.notes)}</div>` : ""}
+      <div class="acts">
+        ${admin ? (sel.bench
+          ? `<button class="btn sm primary" data-act="tosquad" data-pid="${sel.id}"${full ? " disabled" : ""}>${esc(T("toSquad"))}</button>`
+          : (bn.length || mx ? `<button class="btn sm" data-act="tobench" data-pid="${sel.id}">${esc(T("toBench"))}</button>` : "")) : ""}
+        <button class="btn sm danger" data-act="rmp" data-pid="${sel.id}">${esc(T("remove"))}</button>
+      </div>
+    </div>` : "";
+  const sb = root.querySelector(".sharebox");
+  if (!sb.classList.contains("hidden")) sb.querySelector("textarea").value = shareText(ev);
+}
+
+function shareText(ev){
+  const d = parseYmd(ev.date), pp = perPerson(ev), n = squad(ev).length, mx = maxOf(ev);
+  return [
+    `⚽ ${ev.title || typeName(ev.type)}`,
+    `🗓 ${fmtDay(d)}, ${timeRange(ev)}`,
+    ev.field ? `📍 ${ev.field}${ev.address ? ", " + ev.address : ""}` : "",
+    ev.total ? `💶 ${pp ? T("sTotal", money(ev.total), money(pp), n) : T("sTotalOnly", money(ev.total))}` : "",
+    mx ? (isFull(ev) ? `🔒 ${T("sFull", n, mx)}` : `👥 ${T("sSpots", n, mx)}`) : "",
+    `${T("sJoin")} ${eventUrl(ev.id)}`
+  ].filter(Boolean).join("\n");
+}
+function toggleShare(root, ev){
+  const sb = root.querySelector(".sharebox");
+  if (!sb.classList.contains("hidden")) { sb.classList.add("hidden"); return; }
+  const text = shareText(ev);
+  sb.innerHTML = `<textarea rows="6" readonly>${esc(text)}</textarea>
+    <div class="acts">
+      <button class="btn sm primary" data-act="copy">${esc(T("copyMsg"))}</button>
+      <a class="btn sm" href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank" rel="noopener" style="text-decoration:none">${esc(T("sendWA"))}</a>
+      ${navigator.share ? `<button class="btn sm" data-act="native">${esc(T("more"))}</button>` : ""}
+    </div>`;
+  sb.classList.remove("hidden");
+}
+async function copyShare(root){
+  const ta = root.querySelector(".sharebox textarea");
+  try { await navigator.clipboard.writeText(ta.value); toast(T("copied")); }
+  catch { ta.select(); try { document.execCommand("copy"); toast(T("copied")); } catch { toast(T("copyManual")); } }
+}
+
+/* ---------- Public event page ---------- */
+function renderPublic(){
+  app.innerHTML = `
+  ${guestFromAdmin ? `<div class="gbanner"><span>${esc(T("guestBanner"))}</span><button class="btn sm" id="backadm">${esc(T("backCal"))}</button></div>` : ""}
+  <div class="pub">
+    <div class="pub-brand"><span>${esc(CONFIG.TEAM_NAME)}</span>
+      <span class="pub-r">${langSwitch()}</span></div>
+    <div class="card" id="pubCard"><div class="empty">${esc(T("loading"))}</div></div>
+  </div>`;
+  if (guestFromAdmin) $("#backadm").onclick = () => { publicId = null; guestFromAdmin = false; renderAdmin(); };
+  updatePublic();
+}
+function updatePublic(){
+  const card = $("#pubCard"); if (!card) return;
+  if (!loaded) return;
+  const ev = events.find(x => x.id === publicId);
+  if (!ev) { card.dataset.id = ""; card.innerHTML = `<div class="ev-title">${esc(T("unavailT"))}</div><p class="muted">${esc(T("unavailP"))}</p>`; return; }
+  if (card.dataset.id !== ev.id || !card.querySelector(".ev")) mountEventView(card, ev, { admin: false, inModal: false });
+  else updateEventView(card, ev);
+}
+
+/* ---------- Boot ---------- */
+(async () => {
+  route();
+  store = await initStore();
+  setSync();
+  store.subscribe(list => { events = list; loaded = true; onData(); });
+})();
+</script>
+</body>
+</html>
